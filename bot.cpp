@@ -1,23 +1,38 @@
 #include <iostream>
-#include <functional>
 using namespace std;
 struct tac
 {
     int compare = 0;
     char show;
+    char show_int;
 };
 int main()
 {
     tac data[3][3];
-    int char_put = 49;
-    for (int i = 0; i < 3; i++)
+    auto set = [&]()
     {
-        for (int j = 0; j < 3; j++)
+        for (int i = 0; i < 3; i++)
         {
-            data[i][j].show = (char)char_put;
-            char_put++;
+            for (int j = 0; j < 3; j++)
+            {
+                data[i][j].compare = 0;
+            }
         }
-    }
+    };
+
+    auto strat = [&]()
+    {
+        int char_put = 49;
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                data[i][j].show = (char)char_put;
+                data[i][j].show_int = (char)char_put;
+                char_put++;
+            }
+        }
+    };
     auto print = [&data]()
     {
         for (int i = 0; i < 3; i++)
@@ -29,7 +44,7 @@ int main()
             cout << ((i + 1) % 3 ? "\n- - - - -\n" : "");
         }
     };
-    auto matrix = [&data](char x, int y)
+    auto matrix = [&data](char x, int y) -> void
     {
         for (int i = 0; i < 3; i++)
         {
@@ -189,7 +204,7 @@ int main()
         {
             return '7';
         }
-        else if((data[0][1].compare==2 && data[1][2].compare==2) ||(data[0][1].compare==2 && data[1][0].compare==2) || (data[1][0].compare==2 && data[2][1].compare==2) ||(data[2][1].compare==2 && data[1][2].compare==2))
+        else if ((data[0][1].compare == 2 && data[1][2].compare == 2 && data[1][1].compare == 0) || (data[0][1].compare == 2 && data[1][0].compare == 2 && data[1][1].compare == 0) || (data[1][0].compare == 2 && data[2][1].compare == 2 && data[1][1].compare == 0) || (data[2][1].compare == 2 && data[1][2].compare == 2 && data[1][1].compare == 0))
         {
             return '5';
         }
@@ -218,45 +233,176 @@ int main()
                 matrix('9', 1);
         }
     };
-    bool bl = true;
-    print();
-    int count = 0;
+    auto test = [&](char x)->bool
+    {
+        bool bool_test=false;
+        for(int i=0;i<3;i++)
+        {
+            for(int j=0;j<3;j++)
+            {
+                if(data[i][j].show_int==x)
+                {
+                    if(data[i][j].compare!=0)
+                    {
+                        bool_test=true;
+                    }
+                }
+            }
+        }
+        return bool_test;
+    };
+    auto computer_vs_human = [&]()
+    {
+        strat();
+        set();
+        bool bl = true;
+        print();
+        int count = 0;
+        while (true)
+        {
+            if (bl)
+            {
+                count++;
+                cout << "\n\ncomputer:......\n";
+                computer();
+                bl = false;
+                cout << "\n";
+                print();
+                if (check(1))
+                {
+                    cout << "\n.....Oops Computer Win.....\n.....Next Time :).....";
+                    break;
+                }
+            }
+            else
+            {
+                char x;
+                cout << "\n......Your Turn......\nYou:";
+                cin >> x;
+                if(test(x))
+                {
+                    cout << "The position is occupied!\nTry another position\n";
+                    bl=false;
+                    print();
+                }
+                else if(x<'1' || x>'9')
+                {
+                    cout << "Enter correct position!\n";
+                    bl=false;
+                    print();
+                }
+                else 
+                {
+                    count++;
+                    matrix(x, 2);
+                    bl=true;
+                    cout << "\n";
+                    print();
+                    if(check(2))
+                    {
+                        cout << ".....You Win.....\n";
+                        break;
+                    }
+                }
+            }
+            if (count == 9)
+            {
+                cout << "\n......Draw......\n";
+                break;
+            }
+        }
+    };
+    auto human_vs_human = [&]()
+    {
+        strat();
+        set();
+        bool bl = true;
+        print();
+        int count = 0;
+        while (true)
+        {
+            if (bl)
+            {
+                char x;
+                cout << "\nEnter Player X:";
+                cin >> x;
+                if(test(x))
+                {
+                    cout << "The position is occupied!\nTry another position\n";
+                    bl=true;
+                    print();                    
+                }
+                else if(x<'1' || x>'9')
+                {
+                    cout << "Enter correct position!\n";
+                    bl=true;
+                    print();
+                }                
+                else
+                {
+                    count++;
+                    matrix(x, 1);
+                    bl = false;
+                    cout << "\n";
+                    print();
+                    if(check(1))
+                    {
+                        cout << "\n.....Player X Win.....\n";
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                char x;
+                cout << "\nEnter Player O:";
+                cin >> x;
+                if(test(x))
+                {
+                    cout << "The position is occupied!\nTry another position\n";
+                    bl=false;
+                    print();                    
+                }
+                else if(x<'1' || x>'9')
+                {
+                    cout << "Enter correct position!\n";
+                    bl=false;
+                    print();
+                }     
+                else
+                {
+                    count++;
+                    matrix(x, 2);
+                    bl = true;
+                    cout << "\n";
+                    print();
+                    if(check(2))
+                    {
+                        cout << "\n.....Player O Win.....\n";
+                        break;
+                    }
+                }
+            }
+            if (count == 9)
+            {
+                cout << "\n......Draw......\n";
+                break;
+            }
+        }
+    };
+    cout << "........Tic Tac Toe........";
     while (true)
     {
-        if (bl)
-        {
-            cout << "\n......computer:......\n";
-            computer();
-            bl = false;
-            cout << "\n";
-            print();
-            if (check(1))
-            {
-                cout << "\n.....Oops Computer Win.....\n...Next Time :)...";
-                break;
-            }
-        }
+        cout << "\nEnter 1 Computer vs Human!\nEnter 2 Human vs Human!\nEnter 0 EXIT!\n";
+        cout << "ENTER:";
+        int n;
+        cin >> n;
+        if (n == 1)
+            computer_vs_human();
+        else if (n == 2)
+            human_vs_human();
         else
-        {
-            char x;
-            cout << "\n\n......Your Turn......\nYou:";
-            cin >> x;
-            matrix(x, 2);
-            bl = true;
-            cout << "\n";
-            print();
-            if (check(2))
-            {
-                cout << ".....You Win.....\n";
-                break;
-            }
-        }
-        count++;
-        if (count == 9)
-        {
-            cout << "\n......Draw......\n";
-            break;
-        }
+            return 0;
     }
     return 0;
 }
